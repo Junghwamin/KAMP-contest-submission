@@ -136,6 +136,65 @@ python run_all.py --pause chapter
 > `rm -rf ~/kamp_fast` 는 지난 FAST 복사본만 지운다(남아 있으면 `cp -r` 이 그 안에 한 겹 더 복사한다).
 > 같은 폴더에 FULL 결과가 이미 있으면 `run_all.py --fast` 는 덮어쓰기를 거부한다. FAST 결과를 묶으면 이름이 `~/kamp_results_fast.zip` 이 된다.
 
+### 2-1. KAMP 가 아닌 PC(로컬·새 서버)에서 실행 — git clone
+
+위 1)~2)의 `setup_pod.sh` 는 **패키지가 이미 깔린 KAMP 공유 conda 전용**이다. 없는 것(optuna·shap·pytest)만 채우고
+numpy·pandas·lightgbm·TensorFlow 는 설치하지 않는다. 빈 PC 에서 그대로 따라 하면 필수 패키지가 없어
+`run_all.py` 가 사전점검에서 멈춘다(종료코드 `2`, "필수 패키지가 없다").
+빈 PC 에서는 **새 가상환경을 만들고 `requirements.txt` 로 설치한다.** ("pip install -r 금지"는 공유 conda 에만 해당한다.)
+
+**파이썬 버전**: 3.10~3.12 (권장 3.11). `tensorflow==2.17.0`·`numpy==1.26.4` 는 3.13 을 지원하지 않는다.
+
+**1) 받기**
+
+```bash
+git clone https://github.com/Junghwamin/KAMP-contest-submission.git
+cd KAMP-contest-submission
+```
+
+**2) 가상환경 + 설치** (TensorFlow 포함 전부 설치된다. 수 분 걸린다)
+
+Linux · macOS:
+
+```bash
+python3.11 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt pytest
+```
+
+Windows (PowerShell):
+
+```powershell
+py -3.11 -m venv .venv
+.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt pytest
+```
+
+설치 확인: `bash check_env.sh` (Windows 는 Git Bash 에서) — 끝의 '종합 판정'을 본다.
+
+**3) 실행** — 레포의 `outputs/` 에는 **이미 FULL 결과가 들어 있다.** 목적에 따라 고른다.
+
+| 목적 | 명령 | 시간 |
+|---|---|---|
+| 들어 있는 결과 보기 | `python show_results.py` | 즉시 |
+| 들어 있는 결과·모델 검증(재계산 없음) | `python run_all.py --check-only` | 수 분 |
+| 처음부터 다시 계산(FULL) | `python run_all.py` | 30분 이상(5절) |
+| 빠른 동작 확인(FAST) | 아래처럼 **복사본에서** | 수 분 |
+
+FAST 는 같은 폴더의 FULL 결과를 덮어쓰지 않도록 거부되므로 복사본에서 돌린다.
+
+```bash
+cd .. && rm -rf kamp_fast && cp -r KAMP-contest-submission kamp_fast && cd kamp_fast
+python run_all.py --fast && python show_results.py
+```
+
+(Windows PowerShell 에서는 `Copy-Item -Recurse KAMP-contest-submission kamp_fast` 로 복사한다.)
+
+- Linux 서버에서 창을 닫아도 계속 돌리려면 2)의 `nohup` 줄을 그대로 쓴다. Windows 는 `python -X utf8 run_all.py` 로 직접 실행한다.
+- GPU·CUDA 가 없거나 TensorFlow 가 GPU 에서 오류를 내면 `--cpu` 를 붙인다.
+- TensorFlow 설치가 실패해도 `requirements.txt` 에서 `tensorflow` 줄만 빼고 설치하면 된다. 비교 모델(DNN·SimpleRNN)만 건너뛰고 나머지는 그대로 돈다.
+- 모델 번들은 numpy·pandas·lightgbm 이 `requirements.txt` 와 **같은 버전**일 때만 열린다(`VERSION_MISMATCH`, 7절).
+
 ---
 
 ## 3. 폴더 지도
@@ -308,7 +367,7 @@ python -X utf8 -B -m pytest tests -q -p no:cacheprovider
 
 - **Python 3.10 이상**. KAMP 기준: Python 3.11.9 · numpy 1.26.4 · pandas 2.1.4 · scipy 1.11.4 · scikit-learn 1.4.2 · matplotlib 3.9.2 ·
   lightgbm 4.5.0 · statsmodels 0.14.2 · tensorflow 2.17.0 (+ 설치할 것: optuna 5.0.0 · shap 0.49.1). 필요한 패키지는 `requirements.txt`.
-- **공유 conda 에서 `pip install -r requirements.txt` 를 하지 않는다.** 이미 있는 numpy 를 바꾸려다 권한 오류로 막히고 잔해가 남는다. `bash setup_pod.sh` 를 쓴다.
+- **공유 conda 에서 `pip install -r requirements.txt` 를 하지 않는다.** 이미 있는 numpy 를 바꾸려다 권한 오류로 막히고 잔해가 남는다. `bash setup_pod.sh` 를 쓴다. **빈 PC·새 가상환경**에서는 반대로 `pip install -r requirements.txt` 로 전부 설치한다(2-1절).
 - **TensorFlow 를 업그레이드하지 않는다.** GPU 연동이 깨질 수 있다. TensorFlow 가 없어도 비교 모델(DNN·RNN)만 빠지고 나머지는 돈다.
 - 한글 폰트: `Malgun Gothic → NanumGothic → Noto Sans KR → AppleGothic` 순서로 정확히 이 이름을 찾는다. 없으면 그림의 한글만 □ 로 깨지고 코드는 돈다.
 
