@@ -2,7 +2,13 @@
 
 # KAMP 자원최적화 — 실행 패키지
 
-**결론부터 — 아래 네 줄을 차례로 붙여 넣으면 된다.**
+**실행 환경 — KAMP-NOTE 의 TensorFlow 팟에서 켠다.**
+
+- 접속: <https://note.kamp-ai.kr>
+- 분석환경 타입을 **TensorFlow** 로 골라 팟을 띄운 뒤 터미널을 연다. (매뉴얼: 접속 후 페이지 중앙 상단 '분석환경 타입' 옆 **docs**)
+- TensorFlow 팟이 아니면 TensorFlow 가 없어 비교 모델(DNN·SimpleRNN)이 빠지고 결과표가 제출본과 달라진다.
+
+**결론부터 — 터미널에 아래 네 줄을 차례로 붙여 넣으면 된다.**
 
 ```bash
 git clone https://github.com/Junghwamin/KAMP-contest-submission.git && cd KAMP-contest-submission && rm -rf .git
@@ -16,8 +22,8 @@ python run_all.py
 
 - 첫 줄의 `rm -rf .git` 은 **빼면 안 된다.** `.git` 이 있으면 `run_all.py` 가
   `[사전점검 실패] 개발 저장소(.git 있음)에서는 실행하지 않는다` 로 멈춘다(커밋된 outputs 를 덮지 않기 위한 장치).
-- `setup_pod.sh` 는 TensorFlow 를 설치하지 않는다. TensorFlow 가 없는 팟(CPU 팟 등)이면 `run_all.py` 전에 2-1절 A 의 설치 명령을 한 번 더 실행한다.
-  없어도 돌지만 비교 모델(DNN·SimpleRNN)이 빠져 결과표가 제출본과 달라진다.
+- `setup_pod.sh` 는 TensorFlow 를 설치하지 않는다(팟에 있는 것을 그대로 쓴다). TensorFlow 팟이 아닌 곳(CPU 팟 등)에서 돌려야 한다면
+  `run_all.py` 전에 2-1절 A 의 설치 명령을 한 번 더 실행한다.
 - zip 으로 받았거나 빈 PC(패키지 없음)에서 실행한다면 2절·2-1절 B 를 본다.
 
 ---
