@@ -6,6 +6,16 @@
 데이터 적재부터 모델 학습·평가·피크 저감 시뮬레이션·모델 저장·서빙 검증까지 한 번에 끝난다.
 끝나면 `python show_results.py` 로 결과를 **보고서 절 순서대로** 넘겨 본다. 노트북은 쓰지 않는다.
 
+> **GitHub 에서 `git clone` 으로 받았다면 먼저 `.git` 을 지운다.** `.git` 이 있으면 `run_all.py` 가
+> `[사전점검 실패] 개발 저장소(.git 있음)에서는 실행하지 않는다` 로 멈춘다. TensorFlow 가 없는 팟이면 설치도 한 번 더 한다(2-1절).
+>
+> ```bash
+> git clone https://github.com/Junghwamin/KAMP-contest-submission.git && cd KAMP-contest-submission && rm -rf .git
+> bash check_env.sh
+> bash setup_pod.sh --with-tests
+> python run_all.py
+> ```
+
 ---
 
 ## 1. 과제와 결과 요약
