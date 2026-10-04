@@ -2,19 +2,23 @@
 
 # KAMP 자원최적화 — 실행 패키지
 
-**결론부터**: 명령 세 줄(`bash check_env.sh` → `bash setup_pod.sh --with-tests` → `python run_all.py`)이면
+**결론부터 — 아래 네 줄을 차례로 붙여 넣으면 된다.**
+
+```bash
+git clone https://github.com/Junghwamin/KAMP-contest-submission.git && cd KAMP-contest-submission && rm -rf .git
+bash check_env.sh
+bash setup_pod.sh --with-tests
+python run_all.py
+```
+
 데이터 적재부터 모델 학습·평가·피크 저감 시뮬레이션·모델 저장·서빙 검증까지 한 번에 끝난다.
 끝나면 `python show_results.py` 로 결과를 **보고서 절 순서대로** 넘겨 본다. 노트북은 쓰지 않는다.
 
-> **GitHub 에서 `git clone` 으로 받았다면 먼저 `.git` 을 지운다.** `.git` 이 있으면 `run_all.py` 가
-> `[사전점검 실패] 개발 저장소(.git 있음)에서는 실행하지 않는다` 로 멈춘다. TensorFlow 가 없는 팟이면 설치도 한 번 더 한다(2-1절).
->
-> ```bash
-> git clone https://github.com/Junghwamin/KAMP-contest-submission.git && cd KAMP-contest-submission && rm -rf .git
-> bash check_env.sh
-> bash setup_pod.sh --with-tests
-> python run_all.py
-> ```
+- 첫 줄의 `rm -rf .git` 은 **빼면 안 된다.** `.git` 이 있으면 `run_all.py` 가
+  `[사전점검 실패] 개발 저장소(.git 있음)에서는 실행하지 않는다` 로 멈춘다(커밋된 outputs 를 덮지 않기 위한 장치).
+- `setup_pod.sh` 는 TensorFlow 를 설치하지 않는다. TensorFlow 가 없는 팟(CPU 팟 등)이면 `run_all.py` 전에 2-1절 A 의 설치 명령을 한 번 더 실행한다.
+  없어도 돌지만 비교 모델(DNN·SimpleRNN)이 빠져 결과표가 제출본과 달라진다.
+- zip 으로 받았거나 빈 PC(패키지 없음)에서 실행한다면 2절·2-1절 B 를 본다.
 
 ---
 
