@@ -13,9 +13,9 @@ cd ~ && git clone https://github.com/Junghwamin/KAMP-contest-submission.git
 
 zip 위치: `~/KAMP-contest-submission/KAMP_정종묵.zip`
 
-**B. 파일로 받기 (메일 · GitHub 웹 다운로드)**
+**B. 메일로 받은 zip 파일**
 
-1. zip 을 PC 에 저장하십시오. (GitHub 웹: `KAMP_정종묵.zip` 클릭 → 오른쪽 위 다운로드 버튼)
+1. zip 을 PC 에 저장하십시오.
 2. KAMP-NOTE 의 파일 창에서 zip 을 홈 폴더(`~`)로 올리십시오.
 
 zip 위치: `~/KAMP_정종묵.zip`
