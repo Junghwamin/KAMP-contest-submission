@@ -2,29 +2,35 @@
 
 # KAMP 자원최적화 — 실행 패키지
 
-**실행 환경 — KAMP-NOTE 의 TensorFlow 팟에서 켠다.**
+## 빠른 시작
 
-- 접속: <https://note.kamp-ai.kr>
-- 분석환경 타입을 **TensorFlow** 로 골라 팟을 띄운 뒤 터미널을 연다. (매뉴얼: 접속 후 페이지 중앙 상단 '분석환경 타입' 옆 **docs**)
-- TensorFlow 팟이 아니면 TensorFlow 가 없어 비교 모델(DNN·SimpleRNN)이 빠지고 결과표가 제출본과 달라진다.
+이 절차는 **KAMP-NOTE 의 TensorFlow 팟** 하나만 대상으로 한다. 다른 환경은 지원하지 않는다.
 
-**결론부터 — 터미널에 아래 네 줄을 차례로 붙여 넣으면 된다.**
+1. <https://note.kamp-ai.kr> 에 접속하십시오.
+2. '분석환경 타입'에서 **TensorFlow** 를 고르십시오. 팟을 띄우십시오.
+3. 터미널을 여십시오.
+4. 아래 명령을 한 줄씩 붙여 넣으십시오.
 
 ```bash
-git clone https://github.com/Junghwamin/KAMP-contest-submission.git && cd KAMP-contest-submission && rm -rf .git
+cd ~ && git clone https://github.com/Junghwamin/KAMP-contest-submission.git && cd KAMP-contest-submission && rm -rf .git
 bash check_env.sh
 bash setup_pod.sh --with-tests
-python run_all.py
+nohup python -u -X utf8 run_all.py --cpu > ~/full_run.out 2>&1 < /dev/null &
+tail -f ~/full_run.out
 ```
 
-데이터 적재부터 모델 학습·평가·피크 저감 시뮬레이션·모델 저장·서빙 검증까지 한 번에 끝난다.
-끝나면 `python show_results.py` 로 결과를 **보고서 절 순서대로** 넘겨 본다. 노트북은 쓰지 않는다.
+5. 로그의 마지막 줄이 `RUN_ALL_OK mode=FULL` 인지 확인하십시오.
+6. `Ctrl+C` 를 누르십시오. 로그 보기만 멈춘다. 실행은 멈추지 않는다.
+7. 결과를 보십시오: `cd ~/KAMP-contest-submission && python show_results.py`
 
-- 첫 줄의 `rm -rf .git` 은 **빼면 안 된다.** `.git` 이 있으면 `run_all.py` 가
-  `[사전점검 실패] 개발 저장소(.git 있음)에서는 실행하지 않는다` 로 멈춘다(커밋된 outputs 를 덮지 않기 위한 장치).
-- `setup_pod.sh` 는 TensorFlow 를 설치하지 않는다(팟에 있는 것을 그대로 쓴다). TensorFlow 팟이 아닌 곳(CPU 팟 등)에서 돌려야 한다면
-  `run_all.py` 전에 2-1절 A 의 설치 명령을 한 번 더 실행한다.
-- zip 으로 받았거나 빈 PC(패키지 없음)에서 실행한다면 2절·2-1절 B 를 본다.
+이 명령은 데이터 적재, 모델 학습·평가, 피크 저감 시뮬레이션, 모델 저장, 서빙 검증을 한 번에 실행한다.
+결과는 보고서 절 순서대로 나온다. 노트북은 쓰지 않는다.
+
+> **경고** — `rm -rf .git` 을 빼지 마십시오. `.git` 이 있으면 `run_all.py` 가 실행을 거부한다.
+> 메시지: `[사전점검 실패] 개발 저장소(.git 있음)에서는 실행하지 않는다`.
+
+> **참고** — 팟 매뉴얼은 접속 후 페이지 중앙 상단 '분석환경 타입' 옆 **docs** 에 있다.
+> 자세한 절차는 2절, 문제 해결은 9절을 보십시오.
 
 ---
 
@@ -86,170 +92,146 @@ python run_all.py
 
 ---
 
-## 2. KAMP 에서 실행 — 3단계
+## 2. 실행 절차 — KAMP-NOTE TensorFlow 팟
 
-> **GitHub 에서 `git clone` 으로 받았다면 아래 2-1절을 따른다**(`.git` 삭제·TensorFlow 설치가 추가로 필요하다).
+### 2-1 대상 환경
 
-아래 명령은 **한 줄씩 복사해 붙여 넣는다.** (`~` 는 홈 폴더)
+| 항목 | 값 |
+|---|---|
+| 플랫폼 | KAMP-NOTE (<https://note.kamp-ai.kr>) |
+| 분석환경 타입 | **TensorFlow** |
+| 작업 폴더 | `~/KAMP-contest-submission` |
+| 실행 시간 | 약 30분 (FULL, 5절) |
 
-**0) 업로드한 zip 풀기** — JupyterHub 파일 창에 `kamp_upload.zip` 을 올린 뒤 터미널에서:
+`setup_pod.sh` 는 TensorFlow 를 설치하지 않는다. 팟에 있는 TensorFlow 를 그대로 쓴다.
+그래서 TensorFlow 팟이 필요하다. 다른 팟에서는 비교 모델(DNN·SimpleRNN)이 빠진다. 그러면 결과표가 제출본과 달라진다.
+
+제출본 결과(`outputs/`)를 만든 조건: Python 3.11.9 · TensorFlow 2.17.0 · CPU(`--cpu`) · 2026-10-03 · 26분 (`outputs/steps/index.json`).
+
+### 2-2 팟 열기
+
+1. <https://note.kamp-ai.kr> 에 접속하십시오.
+2. '분석환경 타입'에서 **TensorFlow** 를 고르십시오.
+3. 팟을 띄우십시오.
+4. 터미널을 여십시오.
+
+### 2-3 받기
+
+1. 홈 폴더에 저장소를 받으십시오.
+2. `.git` 폴더를 지우십시오.
 
 ```bash
-cd ~ && python -m zipfile -e kamp_upload.zip . && cd ~/KAMP_정종묵
+cd ~ && git clone https://github.com/Junghwamin/KAMP-contest-submission.git && cd KAMP-contest-submission && rm -rf .git
 ```
 
-**1) 진단** — 읽기만 한다. 끝에 '종합 판정'이 나온다.
+> **경고** — `.git` 을 지우지 않으면 `run_all.py` 가 실행을 거부한다. 이 장치는 커밋된 `outputs/` 를 보호한다.
+
+> **주의** — `~/KAMP-contest-submission` 이 이미 있으면 `git clone` 이 실패한다.
+> 이전 결과가 필요 없으면 먼저 지우십시오: `rm -rf ~/KAMP-contest-submission`
+
+> **참고** — `.git` 을 지워도 코드·데이터·결과 파일은 그대로 남는다. 최신본이 필요하면 다시 받으십시오.
+
+### 2-4 환경 점검
+
+1. 점검 스크립트를 실행하십시오. 이 스크립트는 읽기만 한다.
 
 ```bash
 bash check_env.sh
 ```
 
-**2) 준비** — 없는 패키지(보통 optuna·shap)와 pytest 만 설치한다. 이미 있는 numpy·TensorFlow 등은 건드리지 않는다.
+2. 끝의 '종합 판정'을 확인하십시오.
+3. `tensorflow` 줄에 버전이 나오는지 확인하십시오. `2.17.0` 이면 제출본과 같은 조건이다.
+
+### 2-5 준비
+
+1. 준비 스크립트를 실행하십시오.
 
 ```bash
 bash setup_pod.sh --with-tests
 ```
 
-**3) 실행**
+이 스크립트는 없는 패키지만 설치한다(보통 optuna · shap · pytest). 있는 패키지(numpy · TensorFlow 등)는 바꾸지 않는다.
 
-(선택) 먼저 **복사본에서** 빠른 동작 확인(FAST). 수치는 최종값이 아니다. 끝나면 원래 폴더로 돌아온다.
+> **주의** — `pip install -r requirements.txt` 를 쓰지 마십시오. 팟의 공유 conda 에서 권한 오류가 난다(8절).
+
+> **주의** — TensorFlow 를 업그레이드하지 마십시오. GPU 연동이 깨질 수 있다.
+
+### 2-6 실행 (FULL)
+
+1. 작업 폴더로 가십시오.
+2. 백그라운드로 실행하십시오. 브라우저를 닫아도 실행은 계속된다.
 
 ```bash
-rm -rf ~/kamp_fast && cp -r ~/KAMP_정종묵 ~/kamp_fast && cd ~/kamp_fast && python run_all.py --fast && python show_results.py; cd ~/KAMP_정종묵
+cd ~/KAMP-contest-submission
+nohup python -u -X utf8 run_all.py --cpu > ~/full_run.out 2>&1 < /dev/null &
 ```
 
-본 실행(FULL). 터미널·브라우저를 닫아도 계속 돌도록 `nohup`으로 띄운다(JupyterHub 서버 자체가 멈추면 함께 멈춘다 — 9절). 소요시간과 캐시 조건은 5절을 참고한다.
-두 줄을 차례로 붙여 넣는다(`cd` 를 `&` 줄에 붙이면 지금 터미널의 폴더가 바뀌지 않는다).
-
-```bash
-cd ~/KAMP_정종묵
-nohup python -u -X utf8 run_all.py > ~/full_run.out 2>&1 < /dev/null &
-```
-
-진행 상황 보기 (`Ctrl+C` 는 **보기만** 멈추고 실행은 계속된다):
+3. 진행 상황을 보십시오.
 
 ```bash
 tail -f ~/full_run.out
 ```
 
-**성공 신호**: 로그의 마지막 줄이 `RUN_ALL_OK mode=FULL` 이다.
+4. 마지막 줄이 `RUN_ALL_OK mode=FULL` 이면 성공이다.
+5. `Ctrl+C` 로 로그 보기를 멈추십시오. 실행은 멈추지 않는다.
 
-**4) 결과 보기** — 성공 신호를 확인한 뒤, 보고서 순서(요약 → 1.1 … 6장)로 한 쪽씩 넘긴다. Enter 다음 쪽, `q` 끝.
-명령 앞의 `cd ~/KAMP_정종묵 &&` 는 FAST 복사본이나 다른 폴더에서 열리지 않게 하는 것이다. 5) 도 같다.
+> **참고** — `--cpu` 는 GPU 를 쓰지 않게 한다. 제출본도 CPU 로 실행했다.
+> 최종모델(LightGBM, 스레드 4개 고정)은 CPU·GPU 와 관계없이 같은 수치를 낸다.
+> DNN·RNN 수치만 TensorFlow 빌드에 따라 소수점 아래에서 달라질 수 있다(6절).
 
-```bash
-cd ~/KAMP_정종묵 && python show_results.py
-```
+> **참고** — 두 줄을 따로 붙여 넣으십시오. `cd` 를 `&` 줄에 붙이면 지금 터미널의 폴더가 바뀌지 않는다.
 
-**5) 결과 묶기** — 예측·표·그림·단계 로그·모델 번들을 zip 하나로(기본 `~/kamp_results_full.zip`).
+> **참고** — 팟 자체가 멈추면 실행도 멈춘다. 9절을 보십시오.
 
-```bash
-cd ~/KAMP_정종묵 && python run_all.py --pack-results
-```
+### 2-7 결과 보기
 
-**단계마다 멈추며 계산하기** — 터미널 앞에 앉아서 한 장씩 확인하고 싶을 때(nohup 에서는 자동으로 꺼진다):
-
-```bash
-python run_all.py --pause chapter
-```
-
-> FAST 를 복사본에서 돌리는 이유: FAST 결과가 FULL 결과와 섞이지 않게 하기 위해서다.
-> 복사(`cp -r`)는 FULL 을 시작하기 **전에** 한다. FULL 이 도는 중에 복사하면 실행 중 잠금 파일까지 복사돼 FAST 가 시작을 거부한다.
-> `rm -rf ~/kamp_fast` 는 지난 FAST 복사본만 지운다(남아 있으면 `cp -r` 이 그 안에 한 겹 더 복사한다).
-> 같은 폴더에 FULL 결과가 이미 있으면 `run_all.py --fast` 는 덮어쓰기를 거부한다. FAST 결과를 묶으면 이름이 `~/kamp_results_fast.zip` 이 된다.
-
-### 2-1. git clone 으로 받아 실행 (KAMP 팟 · 로컬 PC 공통)
-
-**결과를 만든 환경** — 레포의 `outputs/` 에 들어 있는 FULL 결과(`outputs/steps/index.json`)는
-**Windows 11 · Python 3.11.9 · CPU(`--cpu`) · TensorFlow 2.17.0(keras 3.15.1)** 에서 2026-10-03 에 26분 동안 실행한 것이다.
-위 1)~2)의 `setup_pod.sh` 는 "TensorFlow 가 이미 깔린 KAMP 공유 conda 팟"을 가정해 **TensorFlow 를 설치하지 않는다.**
-TensorFlow 가 없는 팟(CPU 팟 등)에서는 비교 모델(DNN·SimpleRNN)이 빠져 결과표가 제출본과 달라지므로 아래 B-2 로 직접 설치한다.
-
-**1) 받기 + `.git` 지우기 (필수)**
+1. 2-6 의 성공 신호를 확인하십시오.
+2. 결과 화면을 여십시오.
 
 ```bash
-cd ~
-git clone https://github.com/Junghwamin/KAMP-contest-submission.git
-cd KAMP-contest-submission
-rm -rf .git
+cd ~/KAMP-contest-submission && python show_results.py
 ```
 
-`run_all.py` 는 `.git` 이 있는 폴더(개발 저장소)에서는 커밋된 `outputs` 를 덮지 않도록 실행을 거부한다:
-`[사전점검 실패] 개발 저장소(.git 있음)에서는 실행하지 않는다`. 클론하면 `.git` 이 생기므로 지운다.
-지워도 코드·데이터·결과 파일은 그대로이고, 이 폴더에서 `git pull` 만 못 할 뿐이다(최신본이 필요하면 새로 clone).
-클론 폴더를 그대로 두고 싶으면 `.git` 을 뺀 사본에서 돌린다:
-`cp -r KAMP-contest-submission kamp_run && rm -rf kamp_run/.git && cd kamp_run`
+3. Enter 로 다음 쪽으로 가십시오. `q` 로 끝내십시오.
 
-**2) 패키지 준비** — 환경에 따라 A·B 중 하나.
+결과는 보고서 순서(요약 → 1.1 … 6장)로 나온다.
 
-**A. KAMP JupyterHub 팟(공유 conda, numpy 등이 이미 있음)** — `pip install -r requirements.txt` 는 쓰지 않는다(8절).
+### 2-8 결과 묶기
+
+1. 예측 · 표 · 그림 · 단계 로그 · 모델 번들을 zip 하나로 묶으십시오.
 
 ```bash
-bash setup_pod.sh --with-tests
+cd ~/KAMP-contest-submission && python run_all.py --pack-results
 ```
 
-이어서 TensorFlow 가 **없다고** 나오면(`! tensorflow 없음`) CPU 판을 설치한다. `-c` 로 지금 버전(numpy 1.26.4 · protobuf 등)을 묶어
-TensorFlow 가 다른 패키지를 바꾸지 못하게 한다.
+출력 파일: `~/kamp_results_full.zip`
+
+### 2-9 선택 작업
+
+**빠른 동작 확인 (FAST)** — 수치는 최종값이 아니다.
+
+1. FULL 을 시작하기 **전에** 복사본을 만드십시오.
+2. 복사본에서 FAST 를 실행하십시오.
 
 ```bash
-python -m pip list --format=freeze | grep -iE '^(numpy|pandas|scipy|scikit-learn|matplotlib|lightgbm|statsmodels|joblib|protobuf|h5py)==' > ~/kamp_constraints.txt
-python -m pip install --no-cache-dir -c ~/kamp_constraints.txt tensorflow-cpu==2.17.0
-python -c "import tensorflow as tf; print(tf.__version__)"    # 2.17.0 이 나오면 된다
+rm -rf ~/kamp_fast && cp -r ~/KAMP-contest-submission ~/kamp_fast && cd ~/kamp_fast && python run_all.py --fast --cpu && python show_results.py; cd ~/KAMP-contest-submission
 ```
 
-GPU 팟에 TensorFlow 가 이미 있으면 이 단계는 건너뛴다(업그레이드 금지, 8절).
+> **주의** — 원본 폴더에서 `--fast` 를 실행하지 마십시오. 원본에는 FULL 결과가 있다. `run_all.py` 가 덮어쓰기를 거부한다.
 
-**B. 빈 PC · 새 서버** — 새 가상환경을 만들고 `requirements.txt` 로 전부 설치한다("pip install -r 금지"는 공유 conda 에만 해당).
-파이썬은 3.10~3.12(권장 3.11). `tensorflow==2.17.0`·`numpy==1.26.4` 는 3.13 을 지원하지 않는다.
+> **주의** — FULL 실행 중에 복사하지 마십시오. 잠금 파일도 복사된다. 그러면 FAST 가 시작을 거부한다.
 
-Linux · macOS:
+**단계마다 멈추며 실행** — 터미널 앞에서만 동작한다. `nohup` 에서는 자동으로 꺼진다.
 
 ```bash
-python3.11 -m venv .venv
-source .venv/bin/activate
-python -m pip install -r requirements.txt pytest
+cd ~/KAMP-contest-submission && python run_all.py --cpu --pause chapter
 ```
 
-Windows (PowerShell):
-
-```powershell
-py -3.11 -m venv .venv
-.venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt pytest
-```
-
-설치 확인(A·B 공통): `bash check_env.sh` (Windows 는 Git Bash 에서) — 끝의 '종합 판정'을 본다.
-
-**3) 실행** — `outputs/` 에는 **이미 FULL 결과가 들어 있다.** 목적에 따라 고른다.
-
-| 목적 | 명령 | 시간 |
-|---|---|---|
-| 들어 있는 결과 보기 | `python show_results.py` | 즉시 |
-| 들어 있는 결과·모델 검증(재계산 없음) | `python run_all.py --check-only` | 수 분 |
-| 처음부터 다시 계산(FULL, 제출본과 같은 조건) | `python run_all.py --cpu` | 30분 안팎(5절) |
-| 빠른 동작 확인(FAST) | 아래처럼 **복사본에서** | 수 분 |
-
-Linux 서버에서 창을 닫아도 계속 돌리려면:
+**재계산 없이 검증** — 들어 있는 결과와 모델로 서빙 검증과 완료 점검만 실행한다.
 
 ```bash
-nohup python -u -X utf8 run_all.py --cpu > ~/full_run.out 2>&1 < /dev/null &
-tail -f ~/full_run.out          # 마지막 줄 RUN_ALL_OK mode=FULL 이면 성공
+cd ~/KAMP-contest-submission && python run_all.py --check-only
 ```
-
-Windows 는 `python -X utf8 run_all.py --cpu` 로 직접 실행한다.
-
-FAST 는 같은 폴더의 FULL 결과를 덮어쓰지 않도록 거부되므로 복사본에서 돌린다(`.git` 을 지운 뒤 복사).
-
-```bash
-cd .. && rm -rf kamp_fast && cp -r KAMP-contest-submission kamp_fast && cd kamp_fast
-python run_all.py --fast && python show_results.py
-```
-
-(Windows PowerShell 에서는 `Copy-Item -Recurse KAMP-contest-submission kamp_fast` 로 복사한다.)
-
-- `--cpu` 는 GPU 를 쓰지 않게 한다. 제출본이 CPU 로 실행됐으므로 붙이면 같은 조건이 된다. 최종모델(LightGBM, 스레드 4개 고정)은 OS·CPU 와 무관하게 같은 수치가 나오고, DNN·RNN 수치만 OS·TF 빌드에 따라 소수점 아래에서 달라질 수 있다(6절).
-- TensorFlow 설치가 끝내 실패하면 없이 돌려도 된다. 비교 모델(DNN·SimpleRNN)만 건너뛰고 나머지는 그대로 돈다.
-- 모델 번들은 numpy·pandas·lightgbm 이 `requirements.txt` 와 **같은 버전**일 때만 열린다(`VERSION_MISMATCH`, 7절).
 
 ---
 
@@ -258,7 +240,7 @@ python run_all.py --fast && python show_results.py
 모든 폴더에 그 폴더를 설명하는 `README.md` 가 있다. 예외는 실행 중에 생기는 하위 폴더뿐이다(모델 번들·비교 모델 폴더와 빈 `outputs/baseline_repro/` — 이유는 `outputs/models/README.md`).
 
 ```
-KAMP_정종묵/
+KAMP-contest-submission/
 ├── README.md            ← 이 문서
 ├── check_env.sh         ← 1) 환경 진단 (읽기 전용)
 ├── setup_pod.sh         ← 2) 없는 패키지만 설치 + 한글 폰트
@@ -423,8 +405,8 @@ python -X utf8 -B -m pytest tests -q -p no:cacheprovider
 
 - **Python 3.10 이상**. KAMP 기준: Python 3.11.9 · numpy 1.26.4 · pandas 2.1.4 · scipy 1.11.4 · scikit-learn 1.4.2 · matplotlib 3.9.2 ·
   lightgbm 4.5.0 · statsmodels 0.14.2 · tensorflow 2.17.0 (+ 설치할 것: optuna 5.0.0 · shap 0.49.1). 필요한 패키지는 `requirements.txt`.
-- **공유 conda 에서 `pip install -r requirements.txt` 를 하지 않는다.** 이미 있는 numpy 를 바꾸려다 권한 오류로 막히고 잔해가 남는다. `bash setup_pod.sh` 를 쓴다. **빈 PC·새 가상환경**에서는 반대로 `pip install -r requirements.txt` 로 전부 설치한다(2-1절 B).
-- **TensorFlow 를 업그레이드하지 않는다.** GPU 연동이 깨질 수 있다. TensorFlow 가 없어도 비교 모델(DNN·RNN)만 빠지고 나머지는 돈다.
+- **공유 conda 에서 `pip install -r requirements.txt` 를 하지 않는다.** 이미 있는 numpy 를 바꾸려다 권한 오류로 막히고 잔해가 남는다. `bash setup_pod.sh` 를 쓴다.
+- **TensorFlow 는 팟에 있는 것을 쓴다.** KAMP-NOTE 에서 분석환경 타입을 TensorFlow 로 고른다. 업그레이드하지 않는다(GPU 연동이 깨질 수 있다).
 - 한글 폰트: `Malgun Gothic → NanumGothic → Noto Sans KR → AppleGothic` 순서로 정확히 이 이름을 찾는다. 없으면 그림의 한글만 □ 로 깨지고 코드는 돈다.
 
 ---
@@ -443,8 +425,9 @@ python -X utf8 -B -m pytest tests -q -p no:cacheprovider
 | S.4 가 skipped | pytest 가 없다 → `bash setup_pod.sh --with-tests` 후 `python -X utf8 -B -m pytest tests -q -p no:cacheprovider` 로 따로 확인. 실제 통과·실패·skip 개수는 실행 출력으로 확인 |
 | `VERSION_MISMATCH` (서빙) | 번들을 만든 환경과 numpy·pandas·lightgbm 버전이 다르다. 번들은 만든 환경에서 쓴다 |
 | TF/GPU 오류로 4.2·5.5 단계 실패 | `python run_all.py --cpu` |
-| `개발 저장소(.git 있음)에서는 실행하지 않는다` | git clone 한 폴더다. `rm -rf .git` 후 다시 실행(2-1절) |
-| `tensorflow 가 없다` (setup_pod.sh 가 설치하지 않음) | 2-1절 A 의 `tensorflow-cpu==2.17.0` 설치 명령 |
+| `개발 저장소(.git 있음)에서는 실행하지 않는다` | `.git` 을 지우지 않았다. `cd ~/KAMP-contest-submission && rm -rf .git` 을 실행하고 다시 실행한다(2-3) |
+| `tensorflow 가 없다` | TensorFlow 팟이 아니다. 분석환경 타입을 **TensorFlow** 로 골라 팟을 다시 띄운다(2-2) |
+| `git clone` 이 `already exists` 로 실패 | 같은 이름의 폴더가 있다. 필요 없으면 `rm -rf ~/KAMP-contest-submission` 후 다시 받는다(2-3) |
 | 그림의 한글이 □□□ | 폰트 없음. `bash setup_pod.sh` 가 NanumGothic 을 받아 준다. 그다음 다시 실행 |
 | 종료코드 3 | 계산은 끝났지만 완료 점검(C)의 필수 항목이 실패. `python show_results.py` 요약 쪽 맨 위와 `outputs/steps/` 의 C 로그를 본다 |
 | 실행이 멈춘 것 같다 | 6.6 단계는 오래 걸린다. 2분마다 경과 표시가 나오면 정상 |
